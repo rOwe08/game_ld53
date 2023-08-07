@@ -1,0 +1,182 @@
+Uvodní část:
+MindWave: Unraveling Memories je to počítačová hra v žánru puzzle.
+
+Hlavním cílem hry je vrátit všechny vzpomínky hlavní hrdinky-Luny-která si na začátku hry nic nepamatuje. Pomocí hlasu neznámého, Luně je nutné pohybovat překážkami a dosáhnout určitých bodů na každé úrovni, čímž se dostane do oblastí "ztracené paměti", ale je narušena limitem pohybu překážek, což má odkaz na to, že čím déle je ve své mysli a snaží se vykopat vzpomínky, tím těžší to pro ni je.
+
+Na začátku hráč má před sebou měnu, kde, stisknutím tlačítek "PLAY", může začít hrát, ale pokud hráč chce, může změnit jazyk (výchozí je angličtina) na češtinu a zpět kliknutím na příslušné vlajky zemí. Také při stisknutí tlačítka s ikonou reproduktoru může hráč změnit ukazatel hlasitosti. 
+
+Stisknutím tlačítka "PLAY" hra začíná a scéna se mění na "Tutorial", kde se hráč setká s neznámým hlasem a zjistí, jak hra funguje. Hráč se může pohybovat po osvětlených buňkách (nahoru, doleva, doprava, dolů) pomocí možností klepnutí na buňku levým tlačítkem myši pokud na této buňce není překážka, za kterou ve směru pohybu hráče není jiná překážka/konec mapy. Hra je lineární, jeden konec, jedna cesta jak se dostat k tomuto konci, který se skládá z 5 herních úrovní a 2 přechodných (tutorial a epilogue).
+---------------------------------------------------------------------------------------------------------
+Programatorská část:
+
+Dekompozice:
+
+Program se rozbít na 8 SCEN:
+
+SCENA MainMenu, SCENA Tutorial, SCENY (First/Second/Third/Forth/Fifth)Level a SCENA EpilogueLevel.
+
+SCENY (First/Second/Third/Forth/Fifth)Level jsou v zásadě stejné, liší se pouze umístěním překážek a omezením pohybu překážkových bloků.
+
+Rozdíly:
+Omezení (First/Second/Third/Forth/Fifth) -> (4, 3, 9, 14, 10(můžete i za 9))
+
+SCENA MainMenu - je to scéna s tlačítkem pro hraní a dvěma tlačítky pro změnu jazyka.
+SCENA Tutorial - je to scéna, která se liší od scén(First/Second/Third/Forth/Fifth) tím, že neexistují žádná omezení pohybu, která hráči pomáhají pochopit mechaniku hry.
+SCENA EpilogueLevel - je to scéna, která se liší od všech ostatních scén tím, že tam není možné přesunout žádnou z překážek, protože všechny překážky jsou uspořádány tak, aby hráč mohl projít pouze doleva nebo doprava.
+---------------------------------------------------------------------------------------------------------
+Všechny skripty jsou rozděleny do 4 skupin (složek) pro lepší viditelnost:
+1)MainScripts(5 scriptů)
+2)UIScripts(8 scriptů)
+3)HelpScripts(4 scriptů)
+4)GameDesignScripts(4 scriptů)
+
+Celkem v programu jsou 21 scriptů:
+Obstacles.cs, PushableObject.cs, TileHighlightController.cs, Tiles.cs, CleanerDontDestroy.cs, DataCollector.cs, DontDestroy.cs, VolumeController.cs, AudioManager.cs, DialogController.cs, GameManager.cs, Player.cs, PlayerMovement.cs, ButtonLocalization.cs, ChangeToCZButton.cs, ChangeToENButton.cs, PauseMenuController.cs, PlayButton.cs, ScoreManager.cs, SkipTextLocalization.cs, TypewriterEffect.cs.
+
+Popsaní scriptů:
+
+1) Obstacles.cs - Tento skript se stará o nalezení všech překážek v herní scéně a jejich správné rozložení v poli pro další zpracování.
+Skládá se z funkcí:
+public GameObject[,] CreateObstaclesArray(GameObject[,]) - Funkce, která automaticky najde všechny překážky v scéně a vytvoří z nich pole podle jejich pozic v scéně.
+
+2) PushableObject.cs - Tento skript řídí chování každé překážky jako celek.
+Skládá se z funkcí:
+void Update()
+void Start()
+public Vector3 FindNextPosObs(Vector3, float) - Funkce, která odpovídá za hledání další pozice překážky při potenciálním pohybu.
+void MoveToTarget() - Funkce, která odpovídá za řízení pohybu objektů.
+public void SetTargetPosition(Vector3) - Funkce, která odpovídá za přiřazení proměnných při začátku pohybu.
+
+3) TileHighlightController.cs - Skript, který zajišťuje zvýraznění dostupných polí pro hráče (nahoru, doleva, dolů, doprava).
+Skládá se z funkcí: 
+void Update()
+void Start()
+
+4) Tiles.cs - Skript, který zajišťuje nalezení všech polí v herní scéně a jejich správné rozložení v poli pro další zpracování.
+Skládá se z funkcí:
+Awake()
+public List<GameObject> GetOrderedTiles() - Funkce, která odpovídá za třídění pole s buňkami.
+
+5) DataCollector.cs -Skript, který sbírá, přenáší a ukládá informace, které jsou potřebné mezi herními scénami.
+Skládá se z funkcí:
+public void ResetFull() - Funkce, která přiřazuje počáteční hodnoty proměnným s indexy.
+public void IncreaseIndexOfDialog() - Funkce, která zvyšuje index dialogů o 1.
+public void IncreaseIndexOfButton() - Funkce, která zvyšuje index tlačítek o 1.
+public void ResetIndexes() - Funkce, která přiřazuje současné hodnoty proměnných indexů hodnotám při spuštění scény.
+public void SetIndex() - Funkce, která přiřazuje hodnotám při spuštění scény proměnných indexů současné hodnoty.
+private void GetDialogs(string) - Funkce, která získává řetězec z textového souboru pro dialogy.
+private void GetButtons(string) - Funkce, která získává řetězec z textového souboru pro tlačítka.
+public void ChangeToEN() - Funkce, která mění lokalizaci na anglický.
+public void ChangeToCZ() - Funkce, která mění lokalizaci na češtinu.
+
+6) DontDestroy.cs - Skript, který zajišťuje, že objekty, které by měly být zachovány mezi scénami, zůstanou aktivní.
+Skládá se z funkcí:
+Awake().
+
+7) VolumeController.cs - Skript, který řídí hlasitost zvuků v hře.
+Skládá se z funkcí:
+Start().
+public void ChangeVolume() - Funkce, která odpovídá za změnu hlasitosti zvuku ve hře.
+public void ActivateSlider() - Funkce, která odpovídá za aktivaci posuvníku pro zvuk.
+
+8) AudioManager.cs - Skript, který řídí zvuky ve hře obecně.
+Skládá se z funkcí:
+private void Awake()
+private void OnDestroy()
+private void OnSceneLoaded(Scene, LoadSceneMode)
+public void ChangeMusic(AudioClip) - Funkce, která odpovídá za změnu hudby.
+public void PlayWalkingSound() - Funkce, která spustí zvuky pohybu hráče.
+public void PlayObstaclesSound() - Funkce, která spustí zvuky pohybu překážek.
+public void StopSound(AudioSource) - Funkce, která zastaví přehrávání zvuku.
+
+9) DialogController.cs - Skript, který řídí chování hry během dialogů a samotné dialogy.
+Skládá se z funkcí:
+void Awake()
+public void ShowFinalDialog() - Funkce, která otevře poslední dialogy v scéně.
+public void CloseIntroDialog() - Funkce, která uzavře úvodní dialog v scéně.
+public void ShowWindow(GameObject) - Funkce, která odpovídá za aktivaci objektu (v tomto případě okna).
+public void CloseFinalDialog() - Funkce, která uzavře konečný dialog v scéně.
+public void CloseEpilogueDialog() - Funkce, která uzavře poslední okno s textem ve hře.
+public void ShowLimitMessage() - Funkce, která odpovídá za aktivaci textu při pokusu o pohyb častěji než je limit.
+IEnumerator ShowAndHide(GameObject, float) - Funkce, která odpovídá za mechaniku zobrazení a vypnutí okna po určité době.
+
+10) GameManager.cs - Tento skript řídí načítání scén a celkové řízení hry.
+Skládá se z funkcí:
+void Awake()
+public void LoadSceneByIndex(int) - Funkce, která je modifikovanou verzí běžného SceneManagement.LoadSceneByIndex().
+public GameObject FindInactiveObjectByTag(string) - Funkce, která odpovídá za hledání neaktivního objektu v scéně podle tagu.
+
+11) Player.cs - Skript, který řídí chování hráče ve hře obecně.
+Skládá se z funkcí:
+private void Start()
+void Update()
+private bool IsNextCellFree(int, int) - Funkce, která pomáhá zjistit, zda je další buňka v směru pohybu prázdná (bez překážky).
+public bool IsCloseEnough(int, int, int, int, RaycastHit2D) - Funkce, která pomáhá určit, zda došlo k kliknutí na sousední buňky (nahoru, vlevo, dolů, vpravo).
+public (int, int) FindIndexesOfTile(RaycastHit2D) - Funkce, která pomáhá určit index kliknuté buňky v poli.
+void MoveToTarget() - Funkce, která řídí proces pohybu hráče.
+private void GetCurrentLunaRowAndColumn(out int, out int) - Funkce, která získává indexy buňky, na které hráč stojí v poli.
+
+12) PlayerMovement.cs - Skript, který řídí pohyb hráče ve hře.
+Skládá se z funkcí:
+private void Start()
+public void MoveObs(RaycastHit2D, int, int) - Funkce, která odpovídá za proces pohybu překážky.
+public void MoveFree(RaycastHit2D, int, int, int, int) - Funkce, která odpovídá za pohyb bez přesunutí překážky.
+private void PlayMoving(RaycastHit2D, Vector3) - Funkce, která odpovídá za přehrávání animace pohybu.
+public void FindClosestTile(Vector3, out int, out int) - Funkce, která odpovídá za nalezení indexů další buňky v poli směrem k pohybu.
+
+13) ButtonLocalization.cs - Skript, který zajišťuje lokalizaci textu na tlačítkách ve hře.
+Skládá se z funkcí:
+void Start()
+private void Update()
+public void UpdateLocalization() - Funkce, která odpovídá za aktualizaci lokalizace.
+
+14) ChangeToCZButton.cs - Skript, který umožňuje změnit text na tlačítce na češtinu.
+Skládá se z funkcí:
+void Start()
+
+15) ChangeToENButton.cs - Skript, který umožňuje změnit text na tlačítce na angličtinu.
+Skládá se z funkcí:
+void Start()
+
+16) PauseMenuController.cs - Skript, který řídí pauzovací menu ve hře.
+Skládá se z funkcí:
+private void Start()
+private void Update()
+public void TogglePauseMenu() - Funkce, která aktivuje okno pauzovacího menu.
+public void RestartLevel() - Funkce, která odpovídá za tlačítko pro restartování úrovně.
+public void BackToMainMenu() - Funkce, která odpovídá za tlačítko do hlavního menu.
+public void ExitGame() - Funkce, která odpovídá za tlačítko pro ukončení hry.
+
+17) PlayButton.cs - Skript pro tlačítko "Play", které spouští hru.
+Skládá se z funkcí:
+void Start() 
+
+18) ScoreManager.cs - Skript, který sleduje počet pohybů překážek na každé úrovni a aktualizuje text.
+Skládá se z funkcí:
+void Awake()
+public void UpdateScoreText() - Funkce, která odpovídá za aktualizaci textu s počtem pohybů překážky.
+
+19) SkipTextLocalization.cs - Skript, který umožňuje lokalizaci textu pro přeskočení dialogů.
+Skládá se z funkcí:
+void Start()
+
+20) TypewriterEffect.cs - Skript, který řídí efekt psaní textu písmeno po písmenu.
+Skládá se z funkcí:
+void Start() 
+IEnumerator ShowText() - Funkce, která odpovídá za zobrazení textu v dialozích.
+private int FindIndexFirstWord() - Funkce, která odpovídá za nalezení délky prvního slova v dialogu (jména).
+
+21) CleanerDontDestroy.cs - Skript, který vyčistí objekty, které byly uchovávány mezi scénami.
+Skládá se z funkcí:
+public static void Cleanup() - Funkce, která odpovídá za vyčištění objektů, které se obvykle nesmažou při přechodu do jiné scény.
+
+---------------------------------------------------------------------------------------------------------
+ASSETY:
+
+Obrazy, převzaty ze zdrojů: 
+https://files.craftpix.net/ (které už neexistuje)
+https://w3g3a5v6.ssl.hwcdn.net/ (které už neexistuje)
+
+Všechny audiosoubory, převzaty ze zdroje: https://www.fesliyanstudios.com/
+
+Verze: UnityHub 3.4.1, Unity 2021.3.10f1
